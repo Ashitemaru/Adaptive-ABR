@@ -1,0 +1,10 @@
+name: learning_to_adapt
+channels:
+  - defaults
+dependencies:
+  - python=3.7
+  - scipy
+  - tensorflow==1.14.0
+  - numpy
+  - joblib
+prefix: /home/holder/anaconda3/envs/learning_to_adapt
