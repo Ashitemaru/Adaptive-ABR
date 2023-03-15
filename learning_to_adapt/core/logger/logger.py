@@ -434,11 +434,12 @@ def configure(dir=None, format_strs=None, snapshot_mode="last", snapshot_gap=1):
     os.makedirs(dir, exist_ok=True)
 
     log_suffix = ""
-    from mpi4py import MPI
+    # from mpi4py import MPI
 
-    rank = MPI.COMM_WORLD.Get_rank()
-    if rank > 0:
-        log_suffix = "-rank%03i" % rank
+    rank = 0  # @note: We remove OpenMPI so we should reset the `rank` variable
+    # rank = MPI.COMM_WORLD.Get_rank()
+    # if rank > 0:
+    #     log_suffix = "-rank%03i" % rank
 
     if format_strs is None:
         strs, strs_mpi = os.getenv("OPENAI_LOG_FORMAT"), os.getenv(

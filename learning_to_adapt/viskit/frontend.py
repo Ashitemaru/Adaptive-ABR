@@ -1,11 +1,14 @@
+import os
 import sys
 
-sys.path.append(".")
+current_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_path, ".."))
+
 import matplotlib
-import os
 
 matplotlib.use("Agg")
-import flask  # import Flask, render_template, send_from_directory
+
+import flask
 from viskit import core
 from viskit.core import AttrDict, flatten
 import sys
@@ -241,7 +244,8 @@ def make_plot_eps(plot_list, use_median=False, counter=0):
         # for legobj in leg.legendHandles:
         #     legobj.set_linewidth(5.0)
     _plt.savefig(
-        "/Users/rein/Desktop/plots/" + str(counter) + ".pdf", bbox_inches="tight"
+        "/home/holder/workspace/Adaptive-ABR/data/" + str(counter) + ".pdf",
+        bbox_inches="tight",
     )
 
 

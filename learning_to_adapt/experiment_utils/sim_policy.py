@@ -1,3 +1,9 @@
+import os
+import sys
+
+current_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_path, ".."))
+
 import joblib
 import tensorflow as tf
 import argparse
@@ -47,4 +53,4 @@ if __name__ == "__main__":
                 ignore_done=args.ignore_done,
                 adapt_batch_size=json_params.get("adapt_batch_size", None),
             )
-            # print(sum(path['rewards']))
+            print(sum(path["rewards"]))
