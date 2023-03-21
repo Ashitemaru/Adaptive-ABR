@@ -34,7 +34,7 @@ class MLPDynamicsModel(Serializable):
         normalize_input=True,
         optimizer=tf.train.AdamOptimizer,
         valid_split_ratio=0.2,
-        rolling_average_persitency=0.99,
+        rolling_average_persistency=0.99,
     ):
         Serializable.quick_init(self, locals())
 
@@ -43,7 +43,7 @@ class MLPDynamicsModel(Serializable):
         self.next_batch = None
 
         self.valid_split_ratio = valid_split_ratio
-        self.rolling_average_persitency = rolling_average_persitency
+        self.rolling_average_persistency = rolling_average_persistency
 
         self.batch_size = batch_size
         self.learning_rate = learning_rate
@@ -100,7 +100,7 @@ class MLPDynamicsModel(Serializable):
         epochs=1000,
         compute_normalization=True,
         valid_split_ratio=None,
-        rolling_average_persitency=None,
+        rolling_average_persistency=None,
         verbose=False,
         log_tabular=False,
     ):
@@ -110,8 +110,8 @@ class MLPDynamicsModel(Serializable):
 
         if valid_split_ratio is None:
             valid_split_ratio = self.valid_split_ratio
-        if rolling_average_persitency is None:
-            rolling_average_persitency = self.rolling_average_persitency
+        if rolling_average_persistency is None:
+            rolling_average_persistency = self.rolling_average_persistency
 
         assert 1 > valid_split_ratio >= 0
 
@@ -229,8 +229,8 @@ class MLPDynamicsModel(Serializable):
                             valid_loss_rolling_average_prev = valid_loss / 2
 
                     valid_loss_rolling_average = (
-                        rolling_average_persitency * valid_loss_rolling_average
-                        + (1.0 - rolling_average_persitency) * valid_loss
+                        rolling_average_persistency * valid_loss_rolling_average
+                        + (1.0 - rolling_average_persistency) * valid_loss
                     )
 
                     if verbose:

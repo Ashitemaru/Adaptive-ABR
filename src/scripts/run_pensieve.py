@@ -2,21 +2,22 @@ import os
 import sys
 
 current_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(current_path, ".."))
+sys.path.append(os.path.join(current_path, "../.."))
 
-from core.dynamics.mlp_dynamics import MLPDynamicsModel
+from learning_to_adapt.core.utils.utils import ClassEncoder
+from src.envs.pensieve_env import PensieveEnv
+
+from core.dynamics.meta_mlp_dynamics import MetaMLPDynamicsModel
 from core.trainers.mb_trainer import Trainer
-from core.policies.mpc_controller import MPCController
+from core.policies.mpc_controller import MPCControllers
 from core.samplers.sampler import Sampler
 from core.logger import logger
 from core.envs.normalized_env import normalize
-from core.utils.utils import ClassEncoder
 from core.samplers.model_sample_processor import ModelSampleProcessor
 from core.envs import *
 import json
-import os
 
-EXP_NAME = "mb_mpc"
+EXP_NAME = "grbal-pensieve"
 
 
 def run_experiment(config):
@@ -32,17 +33,19 @@ def run_experiment(config):
         cls=ClassEncoder,
     )
 
-    env = normalize(config["env"](reset_every_episode=True, task=config["task"]))
+    env = normalize(config["env"]())
 
-    dynamics_model = MLPDynamicsModel(
+    dynamics_model = MetaMLPDynamicsModel(
         name="dyn_model",
         env=env,
+        meta_batch_size=config["meta_batch_size"],
+        inner_learning_rate=config["inner_learning_rate"],
         learning_rate=config["learning_rate"],
-        hidden_sizes=config["hidden_sizes"],
+        hidden_sizes=config["hidden_sizes_model"],
         valid_split_ratio=config["valid_split_ratio"],
         rolling_average_persistency=config["rolling_average_persistency"],
-        hidden_nonlinearity=config["hidden_nonlinearity"],
-        batch_size=config["batch_size"],
+        hidden_nonlinearity=config["hidden_nonlinearity_model"],
+        batch_size=config["adapt_batch_size"],
     )
 
     policy = MPCController(
@@ -59,12 +62,15 @@ def run_experiment(config):
     sampler = Sampler(
         env=env,
         policy=policy,
-        num_rollouts=config["num_rollouts"],
-        max_path_length=config["max_path_length"],
         n_parallel=config["n_parallel"],
+        max_path_length=config["max_path_length"],
+        num_rollouts=config["num_rollouts"],
+        adapt_batch_size=config[
+            "adapt_batch_size"
+        ],  # Comment this out and it won't adapt during rollout
     )
 
-    sample_processor = ModelSampleProcessor(recurrent=False)
+    sample_processor = ModelSampleProcessor(recurrent=True)
 
     algo = Trainer(
         env=env,
@@ -84,30 +90,32 @@ if __name__ == "__main__":
 
     config = {
         # Environment
-        "env": HalfCheetahEnv,
+        "env": PensieveEnv,
+        "max_path_length": 1000,
         "task": None,
+        "normalize": True,
+        "n_itr": 50,
+        "discount": 1.0,
         # Policy
-        "n_candidates": 2000,
-        "horizon": 20,
+        "n_candidates": 500,
+        "horizon": 10,
         "use_cem": False,
         "num_cem_iters": 5,
-        "discount": 1.0,
-        # Sampling
-        "max_path_length": 100,
-        "num_rollouts": 10,
-        "initial_random_samples": True,
         # Training
-        "n_itr": 50,
-        "learning_rate": 1e-3,
-        "batch_size": 128,
-        "dynamic_model_epochs": 100,
+        "num_rollouts": 5,
         "valid_split_ratio": 0.1,
         "rolling_average_persistency": 0.99,
+        "initial_random_samples": True,
         # Dynamics Model
-        "hidden_sizes": (512, 512),
-        "hidden_nonlinearity": "relu",
+        "meta_batch_size": 10,
+        "hidden_nonlinearity_model": "relu",
+        "learning_rate": 1e-3,
+        "inner_learning_rate": 0.001,
+        "hidden_sizes_model": (512, 512, 512),
+        "dynamic_model_epochs": 100,
+        "adapt_batch_size": 16,
         # Other
-        "n_parallel": 2,
+        "n_parallel": 5,
     }
 
     run_experiment(config)

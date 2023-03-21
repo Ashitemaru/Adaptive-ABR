@@ -103,7 +103,7 @@ if __name__ == "__main__":
         "backprop_steps": 100,
         "dynamic_model_epochs": 50,
         "valid_split_ratio": 0.1,
-        "rolling_average_persitency": 0.99,
+        "rolling_average_persistency": 0.99,
         # Dynamics Model
         "cell_type": "lstm",
         "hidden_sizes": (256,),

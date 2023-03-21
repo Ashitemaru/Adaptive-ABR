@@ -41,7 +41,7 @@ def run_experiment(config):
         learning_rate=config["learning_rate"],
         hidden_sizes=config["hidden_sizes_model"],
         valid_split_ratio=config["valid_split_ratio"],
-        rolling_average_persitency=config["rolling_average_persitency"],
+        rolling_average_persistency=config["rolling_average_persistency"],
         hidden_nonlinearity=config["hidden_nonlinearity_model"],
         batch_size=config["adapt_batch_size"],
     )
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         # Training
         "num_rollouts": 5,
         "valid_split_ratio": 0.1,
-        "rolling_average_persitency": 0.99,
+        "rolling_average_persistency": 0.99,
         "initial_random_samples": True,
         # Dynamics Model
         "meta_batch_size": 10,
