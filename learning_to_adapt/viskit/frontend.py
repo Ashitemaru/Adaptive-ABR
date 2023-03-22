@@ -332,7 +332,7 @@ def get_plot_instruction(
             group_selectors = [core.Selector(list(x[1])) for x in splitted]
             group_legends = [x[0] for x in splitted]
         else:
-            if group_key and group_key is not "exp_name":
+            if group_key and group_key != "exp_name":
                 vs = [vs for k, vs in distinct_params if k == group_key][0]
                 group_selectors = [split_selector.where(group_key, v) for v in vs]
                 group_legends = [str(x) for x in vs]

@@ -108,7 +108,9 @@ class PensieveEnv(Env, Serializable):
             np.max(VIDEO_BIT_RATE)
         )  # Last quality
         state[1, -1] = self.buffer_size / BUFFER_NORM_FACTOR  # 10 sec
-        state[2, -1] = float(video_chunk_size) / float(delay) / M_IN_K  # Kilo byte per ms
+        state[2, -1] = (
+            float(video_chunk_size) / float(delay) / M_IN_K
+        )  # Kilo byte per ms
         state[3, -1] = float(delay) / M_IN_K / BUFFER_NORM_FACTOR  # 10 sec
         state[4, :ACTION_DIM] = (
             np.array(next_video_chunk_sizes) / M_IN_K / M_IN_K
@@ -119,17 +121,17 @@ class PensieveEnv(Env, Serializable):
         self.state = state
 
         return state
-    
+
     def render(self):
         return
-    
+
     def log_diagnostics(self, paths):
         print(f"Trying to log to {paths}")
 
     @property
     def action_dim(self):
         return ACTION_DIM
-    
+
     # TODO: Here we do not implement `action_space` & `observation_space` property
     #       If necessary, we will implement these 2 properties
 
