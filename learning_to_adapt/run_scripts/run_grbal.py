@@ -105,13 +105,13 @@ if __name__ == "__main__":
         "rolling_average_persistency": 0.99,
         "initial_random_samples": True,
         # Dynamics Model
-        "meta_batch_size": 10,
+        "meta_batch_size": 32,
         "hidden_nonlinearity_model": "relu",
-        "learning_rate": 1e-3,
-        "inner_learning_rate": 0.001,
+        "learning_rate": 0.001,
+        "inner_learning_rate": 0.01,
         "hidden_sizes_model": (512, 512, 512),
-        "dynamic_model_epochs": 100,
-        "adapt_batch_size": 16,
+        "dynamic_model_epochs": 50,
+        "adapt_batch_size": 400,
         # Other
         "n_parallel": 5,
     }

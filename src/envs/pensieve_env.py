@@ -132,8 +132,13 @@ class PensieveEnv(Env, Serializable):
     def action_dim(self):
         return ACTION_DIM
 
-    # TODO: Here we do not implement `action_space` & `observation_space` property
-    #       If necessary, we will implement these 2 properties
+    @property
+    def observation_space(self):
+        return super().observation_space
+
+    @property
+    def action_space(self):
+        return super().action_space
 
 
 if __name__ == "__main__":

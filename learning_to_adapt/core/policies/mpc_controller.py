@@ -35,7 +35,7 @@ class MPCController(Policy, Serializable):
         while hasattr(self.unwrapped_env, "wrapped_env"):
             self.unwrapped_env = self.unwrapped_env.wrapped_env
 
-        # make sure that enc has reward function
+        # make sure that env has reward function
         assert hasattr(self.unwrapped_env, "reward"), "env must have a reward function"
 
         Serializable.quick_init(self, locals())

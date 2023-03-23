@@ -1,23 +1,21 @@
 import os
 import sys
+import json
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_path, "../.."))
 
 from learning_to_adapt.core.utils.utils import ClassEncoder
+from learning_to_adapt.core.envs.normalized_env import normalize
+from learning_to_adapt.core.policies.mpc_controller import MPCController
+from learning_to_adapt.core.samplers.sampler import Sampler
+from learning_to_adapt.core.samplers.model_sample_processor import ModelSampleProcessor
+from learning_to_adapt.core.logger import logger
+from learning_to_adapt.core.dynamics.meta_mlp_dynamics import MetaMLPDynamicsModel
+from learning_to_adapt.core.trainers.mb_trainer import Trainer
 from src.envs.pensieve_env import PensieveEnv
 
-from core.dynamics.meta_mlp_dynamics import MetaMLPDynamicsModel
-from core.trainers.mb_trainer import Trainer
-from core.policies.mpc_controller import MPCControllers
-from core.samplers.sampler import Sampler
-from core.logger import logger
-from core.envs.normalized_env import normalize
-from core.samplers.model_sample_processor import ModelSampleProcessor
-from core.envs import *
-import json
-
-EXP_NAME = "grbal-pensieve"
+EXP_NAME = "grbal_pensieve"
 
 
 def run_experiment(config):
@@ -33,7 +31,7 @@ def run_experiment(config):
         cls=ClassEncoder,
     )
 
-    env = normalize(config["env"]())
+    env = config["env"]()  # TODO: Here we do not normalize the Pensieve env
 
     dynamics_model = MetaMLPDynamicsModel(
         name="dyn_model",

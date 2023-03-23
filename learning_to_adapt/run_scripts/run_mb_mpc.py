@@ -98,7 +98,7 @@ if __name__ == "__main__":
         "initial_random_samples": True,
         # Training
         "n_itr": 50,
-        "learning_rate": 1e-3,
+        "learning_rate": 0.001,
         "batch_size": 128,
         "dynamic_model_epochs": 100,
         "valid_split_ratio": 0.1,

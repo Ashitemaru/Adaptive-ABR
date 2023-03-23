@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     config = {
         # Environment
-        "env": HalfCheetahEnv,
+        "env": AntEnv,
         "task": None,
         # Policy
         "n_candidates": 500,
@@ -98,8 +98,8 @@ if __name__ == "__main__":
         "initial_random_samples": True,
         # Training
         "n_itr": 50,
-        "learning_rate": 1e-2,
-        "batch_size": 10,
+        "learning_rate": 0.001,
+        "batch_size": 500,
         "backprop_steps": 100,
         "dynamic_model_epochs": 50,
         "valid_split_ratio": 0.1,

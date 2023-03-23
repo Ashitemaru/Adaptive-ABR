@@ -5,7 +5,7 @@ PACKET_PAYLOAD_PORTION = 0.95
 LINK_RTT = 80  # In ms
 NOISE_LOW = 0.9
 NOISE_HIGH = 1.1
-VIDEO_CHUNK_LEN = 4000  # In ms
+VIDEO_CHUNCK_LEN = 4000  # In ms
 BUFFER_THRESH = 60000  # In ms
 DRAIN_BUFFER_SLEEP_TIME = 500  # In ms
 TOTAL_VIDEO_CHUNCK = 48
@@ -25,5 +25,5 @@ M_IN_K = 1000
 B_IN_MB = 1000000
 BITS_IN_BYTE = 8
 
-TRACE_FILE = "./data/trace"
-VIDEO_SIZE_FILE = "./data/video_size"
+TRACE_FILE = "./src/data/cooked_traces/"
+VIDEO_SIZE_FILE = "./src/data/video_size/video_size_"

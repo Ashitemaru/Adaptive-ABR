@@ -14,7 +14,6 @@ import itertools
 class Sampler(BaseSampler):
     """
     Sampler for Meta-RL
-
     """
 
     def __init__(
@@ -110,7 +109,7 @@ class Sampler(BaseSampler):
             next_obses, rewards, dones, env_infos = self.vec_env.step(actions)
             env_time += time.time() - t
 
-            #  stack agent_infos and if no infos were provided (--> None) create empty dicts
+            # stack agent_infos and if no infos were provided (--> None) create empty dicts
             agent_infos, env_infos = self._handle_info_dicts(agent_infos, env_infos)
 
             new_samples = 0
