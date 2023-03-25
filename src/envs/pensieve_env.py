@@ -132,13 +132,15 @@ class PensieveEnv(Env, Serializable):
     def action_dim(self):
         return ACTION_DIM
 
+    # TODO: Incompleted implementation
     @property
     def observation_space(self):
-        return super().observation_space
+        raise NotImplementedError
 
+    # TODO: Incompleted implementation
     @property
     def action_space(self):
-        return super().action_space
+        raise NotImplementedError
 
 
 if __name__ == "__main__":

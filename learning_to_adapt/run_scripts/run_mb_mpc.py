@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     config = {
         # Environment
-        "env": HalfCheetahEnv,
+        "env": Arm7DofEnv,
         "task": None,
         # Policy
         "n_candidates": 2000,

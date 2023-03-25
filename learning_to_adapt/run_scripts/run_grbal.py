@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     config = {
         # Environment
-        "env": HalfCheetahEnv,
+        "env": Arm7DofEnv,
         "max_path_length": 1000,
         "task": None,
         "normalize": True,
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         "meta_batch_size": 32,
         "hidden_nonlinearity_model": "relu",
         "learning_rate": 0.001,
-        "inner_learning_rate": 0.01,
+        "inner_learning_rate": 0.001,
         "hidden_sizes_model": (512, 512, 512),
         "dynamic_model_epochs": 50,
         "adapt_batch_size": 400,

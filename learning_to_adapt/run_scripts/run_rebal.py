@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     config = {
         # Environment
-        "env": AntEnv,
+        "env": Arm7DofEnv,
         "task": None,
         # Policy
         "n_candidates": 500,
