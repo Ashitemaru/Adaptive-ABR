@@ -1,3 +1,4 @@
 /data/**
 **/__pycache__/**
 **/MUJOCO_LOG.TXT
+/src/data/base/**

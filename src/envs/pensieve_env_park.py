@@ -46,7 +46,6 @@ class PenseieveEnvPark(Env, Serializable):
 
     def __load_traces(self):
         self.data_loader = DataLoader()
-        self.train_traces = self.data_loader.train_set
 
     def log_diagnostics(self, paths):
         print(f"Log to {paths}")

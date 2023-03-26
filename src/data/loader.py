@@ -11,6 +11,11 @@ TRAIN_DATA_DIR = "./src/data/env_train_traces"
 TEST_DATA_DIR = "./src/data/env_test_traces"
 
 
+def create_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
 class TraceHelper:
     @classmethod
     def down_sample(cls, trace, interval=2):
@@ -104,6 +109,7 @@ class TraceHelper:
     def dump_trace(cls, trace, path, enable_none=False):
         with open(path, "w") as f:
             for t in trace:
+                # print(t)
                 if t[1] is None and not enable_none:
                     continue
 
@@ -133,9 +139,20 @@ class DataLoader:
         self.__load_trace(mode="train")
         self.__load_trace(mode="test")
 
+        print(
+            f"Train dataset size: {self.train_set_n}. Test dataset size: {self.test_set_n}"
+        )
+
     def __load_trace(self, mode="train"):
         data_root = TRAIN_DATA_DIR if mode == "train" else TEST_DATA_DIR
         trace_file_list = os.listdir(data_root)
+
+        if mode == "train":
+            self.train_set_n = len(trace_file_list)
+        elif mode == "test":
+            self.test_set_n = len(trace_file_list)
+        else:
+            raise ValueError("Invalid mode")
 
         tot_overlap_cnt = 0
         for file_name in trace_file_list:
@@ -163,22 +180,23 @@ class DataLoader:
         print(f"Detected {tot_overlap_cnt} overlap(s) totally for mode {mode}.")
 
     def __sample_trace_by_env(self, env):
-        trace_set = []
-        if env == "4g-walking":
-            trace_set = self.walking_4g_train_trace
-        elif env == "4g-driving":
-            trace_set = self.driving_4g_train_trace
-        elif env == "5g-walking":
-            trace_set = self.walking_5g_train_trace
-        elif env == "5g-driving-train":
-            trace_set = self.driving_5g_train_trace
-        elif env == "5g-driving-test":
-            trace_set = self.driving_5g_test_trace
-        else:
-            raise ValueError("Invalid environment")
-
+        trace_set = self.get_trace_set_by_env(env)
         index = np.random.randint(len(trace_set))
         return trace_set[index]
+
+    def get_trace_set_by_env(self, env):
+        if env == "4g-walking":
+            return self.walking_4g_train_trace
+        elif env == "4g-driving":
+            return self.driving_4g_train_trace
+        elif env == "5g-walking":
+            return self.walking_5g_train_trace
+        elif env == "5g-driving-train":
+            return self.driving_5g_train_trace
+        elif env == "5g-driving-test":
+            return self.driving_5g_test_trace
+        else:
+            raise ValueError("Invalid environment")
 
     def sample_switch_trace(
         self,
@@ -220,21 +238,96 @@ class DataLoader:
         else:
             raise ValueError("Invalid switching mode")
 
-    @property
-    def test_set(self):
-        return self.driving_5g_test_trace
 
-    @property
-    def train_set(self):
-        return (
-            self.driving_4g_train_trace
-            + self.driving_5g_train_trace
-            + self.walking_4g_train_trace
-            + self.walking_5g_train_trace
+def generate_pensieve_baseline_set():
+    loader = DataLoader()
+
+    """
+    3 kinds of train set:
+    - only 4G walking network trace & only 4G driving network traces (no switching)
+    - all pure 4G traces : switching traces (intervally, n_switch=3) = 3 : 2
+    - all pure 4G traces : switching traces (intervally, n_switch=3) : switching traces (randomly) = 3 : 1 : 1
+    
+    4 parts of test set:
+    - pure 4G walking traces
+    - pure 4G driving traces
+    - switching traces (intervally, n_switch=3)
+    - switching traces (randomly)
+    """
+
+    base_set = loader.get_trace_set_by_env("4g-walking") + loader.get_trace_set_by_env(
+        "4g-driving"
+    )
+    base_n = len(base_set)
+    base_set = [
+        loader.sample_switch_trace("4g-walking", "4g-walking", "random")[0]
+        for _ in range(int(base_n / 2))
+    ] + [
+        loader.sample_switch_trace("4g-driving", "4g-driving", "random")[0]
+        for _ in range(base_n - int(base_n / 2))
+    ]
+    print(f"Pure 4G dataset size: {base_n}")
+
+    mixin_size = int(base_n / 3)
+    print(f"Mixin part size: {mixin_size}")
+    interval_set = [
+        loader.sample_switch_trace("4g-walking", "4g-driving", "interval", n_switch=3)[
+            0
+        ]
+        for _ in range(2 * mixin_size)
+    ]
+    random_set = [
+        loader.sample_switch_trace("4g-walking", "4g-driving", "random")[0]
+        for _ in range(mixin_size)
+    ]
+
+    train_set_1 = base_set
+    train_set_2 = base_set + interval_set
+    train_set_3 = base_set + interval_set[:mixin_size] + random_set
+
+    # Dump train set
+    for i in range(1, 4):
+        create_dir(f"./src/data/base/train_set_{i}")
+    for idx, trace in enumerate(train_set_1):
+        TraceHelper.dump_trace(trace, f"./src/data/base/train_set_1/trace_{idx}.log")
+    for idx, trace in enumerate(train_set_2):
+        TraceHelper.dump_trace(trace, f"./src/data/base/train_set_2/trace_{idx}.log")
+    for idx, trace in enumerate(train_set_3):
+        TraceHelper.dump_trace(trace, f"./src/data/base/train_set_3/trace_{idx}.log")
+
+    interval_test_set = [
+        loader.sample_switch_trace("4g-walking", "4g-driving", "interval", n_switch=3)[
+            0
+        ]
+        for _ in range(base_n)
+    ]
+    random_test_set = [
+        loader.sample_switch_trace("4g-walking", "4g-driving", "random")[0]
+        for _ in range(base_n)
+    ]
+
+    # Dump test set
+    create_dir(f"./src/data/base/test_set_pure_walking")
+    create_dir(f"./src/data/base/test_set_pure_driving")
+    create_dir(f"./src/data/base/test_set_interval")
+    create_dir(f"./src/data/base/test_set_random")
+    for idx, trace in enumerate(loader.get_trace_set_by_env("4g-walking")):
+        TraceHelper.dump_trace(
+            trace, f"./src/data/base/test_set_pure_walking/trace_{idx}.log"
+        )
+    for idx, trace in enumerate(loader.get_trace_set_by_env("4g-driving")):
+        TraceHelper.dump_trace(
+            trace, f"./src/data/base/test_set_pure_driving/trace_{idx}.log"
+        )
+    for idx, trace in enumerate(interval_test_set):
+        TraceHelper.dump_trace(
+            trace, f"./src/data/base/test_set_interval/trace_{idx}.log"
+        )
+    for idx, trace in enumerate(random_test_set):
+        TraceHelper.dump_trace(
+            trace, f"./src/data/base/test_set_random/trace_{idx}.log"
         )
 
 
 if __name__ == "__main__":
-    loader = DataLoader()
-    trace, split_time_list = loader.sample_switch_trace(switch_mode="random")
-    TraceHelper.plot_trace(trace, split_time_list, "TEST", "./image/test.png")
+    generate_pensieve_baseline_set()
