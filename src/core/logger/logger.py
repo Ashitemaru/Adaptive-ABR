@@ -336,8 +336,6 @@ def profile(n):
 
 
 class Logger(object):
-    DEFAULT = None  # A logger with no output files. (See right below class definition)
-    # So that you can still log to the terminal without setting up any output files
     CURRENT = None  # Current logger being used by the free functions above
 
     def __init__(self, dir, output_formats, snapshot_mode="last", snapshot_gap=1):
@@ -417,11 +415,6 @@ class Logger(object):
                 raise NotImplementedError
 
 
-Logger.DEFAULT = Logger.CURRENT = Logger(
-    dir=None, output_formats=[HumanOutputFormat(sys.stdout)]
-)
-
-
 def configure(dir=None, format_strs=None, snapshot_mode="last", snapshot_gap=1):
     if dir is None:
         dir = os.getenv("OPENAI_LOGDIR")
@@ -460,28 +453,6 @@ def configure(dir=None, format_strs=None, snapshot_mode="last", snapshot_gap=1):
         snapshot_gap=snapshot_gap,
     )
     log("Logging to %s" % dir)
-
-
-def reset():
-    if Logger.CURRENT is not Logger.DEFAULT:
-        Logger.CURRENT.close()
-        Logger.CURRENT = Logger.DEFAULT
-        log("Reset logger")
-
-
-class scoped_configure(object):
-    def __init__(self, dir=None, format_strs=None):
-        self.dir = dir
-        self.format_strs = format_strs
-        self.prevlogger = None
-
-    def __enter__(self):
-        self.prevlogger = Logger.CURRENT
-        configure(dir=self.dir, format_strs=self.format_strs)
-
-    def __exit__(self, *args):
-        Logger.CURRENT.close()
-        Logger.CURRENT = self.prevlogger
 
 
 # ================================================================

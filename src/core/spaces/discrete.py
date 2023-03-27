@@ -15,6 +15,10 @@ class Discrete(Space):
     def n(self):
         return self._n
 
+    @property
+    def shape(self):
+        return (self._n,)
+
     def sample(self):
         return np.random.randint(self.n)
 

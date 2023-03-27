@@ -3,17 +3,17 @@ import sys
 import json
 
 current_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(current_path, "../.."))
+sys.path.append(os.path.join(current_path, ".."))
 
-from learning_to_adapt.core.utils.utils import ClassEncoder
-from learning_to_adapt.core.envs.normalized_env import normalize
-from learning_to_adapt.core.policies.mpc_controller import MPCController
-from learning_to_adapt.core.samplers.sampler import Sampler
-from learning_to_adapt.core.samplers.model_sample_processor import ModelSampleProcessor
-from learning_to_adapt.core.logger import logger
-from learning_to_adapt.core.dynamics.meta_mlp_dynamics import MetaMLPDynamicsModel
-from learning_to_adapt.core.trainers.mb_trainer import Trainer
-from src.envs.pensieve_env import PensieveEnv
+from core.utils.utils import ClassEncoder
+from core.envs.normalized_env import normalize
+from core.policies.mpc_controller import MPCController
+from core.samplers.sampler import Sampler
+from core.samplers.model_sample_processor import ModelSampleProcessor
+from core.logger import logger
+from core.dynamics.meta_mlp_dynamics import MetaMLPDynamicsModel
+from core.trainers.mb_trainer import Trainer
+from core.envs.pensieve_env_park import PenseieveEnvPark
 
 EXP_NAME = "grbal_pensieve"
 
@@ -31,7 +31,7 @@ def run_experiment(config):
         cls=ClassEncoder,
     )
 
-    env = config["env"]()  # TODO: Here we do not normalize the Pensieve env
+    env = normalize(config["env"]())
 
     dynamics_model = MetaMLPDynamicsModel(
         name="dyn_model",
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     config = {
         # Environment
-        "env": PensieveEnv,
+        "env": PenseieveEnvPark,
         "max_path_length": 1000,
         "task": None,
         "normalize": True,

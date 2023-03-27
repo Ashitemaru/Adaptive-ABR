@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     config = {
         # Environment
-        "env": Arm7DofEnv,
+        "env": AntEnv,
         "max_path_length": 1000,
         "task": None,
         "normalize": True,

@@ -2,17 +2,17 @@ import numpy as np
 
 BITRATE_LEVELS = 6
 PACKET_PAYLOAD_PORTION = 0.95
-LINK_RTT = 80  # In ms
-NOISE_LOW = 0.9
-NOISE_HIGH = 1.1
+LINK_RTT = 104  # In ms
+NOISE_LOW = 0.95
+NOISE_HIGH = 1.05
 VIDEO_CHUNCK_LEN = 4000  # In ms
 BUFFER_THRESH = 60000  # In ms
 DRAIN_BUFFER_SLEEP_TIME = 500  # In ms
-TOTAL_VIDEO_CHUNCK = 48
+TOTAL_VIDEO_CHUNCK = 157
 DEFAULT_QUALITY = 1
-VIDEO_BIT_RATE = np.array([300.0, 750.0, 1200.0, 1850.0, 2850.0, 4300.0])  # In kbps
+VIDEO_BIT_RATE = np.array([20000, 40000, 60000, 80000, 110000, 160000])  # In kbps
 BUFFER_NORM_FACTOR = 10.0
-REBUF_PENALTY = 4.3  # 1 sec rebuffering -> 3 Mbps
+REBUF_PENALTY = 160
 SMOOTH_PENALTY = 1
 CHUNK_TIL_VIDEO_END_CAP = 48
 
@@ -26,4 +26,4 @@ B_IN_MB = 1000000
 BITS_IN_BYTE = 8
 
 TRACE_FILE = "./src/data/cooked_traces/"
-VIDEO_SIZE_FILE = "./src/data/video_size/video_size_"
+VIDEO_SIZE_FILE = "./src/data/video_size_5g/video_size_"
