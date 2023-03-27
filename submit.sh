@@ -5,7 +5,6 @@ if [ 1 -ne $# ]; then
 fi
 
 echo "Use BLACK to format all Python files."
-black ./learning_to_adapt
 black ./src
 echo "Finish formatting"
 
