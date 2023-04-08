@@ -1,11 +1,12 @@
 import numpy as np
 from collections import deque
+import os
 
 from core.utils.serializable import Serializable
 from core.envs.base import Env
 from core.spaces.box import Box
 from core.logger import logger
-from core.utils.trace_loader import DataLoader
+from core.utils.trace_loader import TraceHelper
 from core.utils.constants import (
     ACTION_DIM,
     BITRATE_LEVELS,
@@ -20,10 +21,11 @@ from core.utils.constants import (
 
 
 class PenseieveEnvPark(Env, Serializable):
-    def __init__(self, random_seed=42):
+    def __init__(self, mode="train-1", random_seed=42):
         Serializable.quick_init(self, locals())
 
         self.random_seed = random_seed
+        self.mode = mode
         np.random.seed(random_seed)
 
         self.__setup_space()
@@ -54,8 +56,10 @@ class PenseieveEnvPark(Env, Serializable):
 
     def __convert_action(self, action):
         action = int(action[0])
-        if action == ACTION_DIM:
+        if action >= ACTION_DIM:
             return ACTION_DIM - 1
+        elif action < 0:
+            return 0
         else:
             return action
 
@@ -76,10 +80,30 @@ class PenseieveEnvPark(Env, Serializable):
         # assert self.total_num_chunks == TOTAL_VIDEO_CHUNCK
 
     def __load_traces(self):
-        loader = DataLoader()
-        self.all_trace = loader.get_trace_set_by_env(
-            "4g-walking"
-        ) + loader.get_trace_set_by_env("4g-driving")
+        root = "./src/data/base/"
+        if self.mode.startswith("train-") and self.mode.split("-")[1] in [
+            "1",
+            "2",
+            "3",
+        ]:
+            suffix = self.mode.replace("train-", "train_set_")
+        elif self.mode.startswith("test-") and self.mode.split("-")[1] in [
+            "interval",
+            "driving",
+            "walking",
+            "random",
+        ]:
+            suffix = self.mode.replace("test-", "test_set_")
+        else:
+            raise ValueError("Invalid mode")
+
+        self.all_trace = []
+        trace_file_list = os.listdir(root + suffix)
+        for file_name in trace_file_list:
+            file_path = os.path.join(root + suffix, file_name)
+            trace, _ = TraceHelper.load_trace(file_path, enable_none=False)
+
+            self.all_trace.append(trace)
 
     def __sample_trace(self):
         trace_len = [len(trace) for trace in self.all_trace]
@@ -92,7 +116,7 @@ class PenseieveEnvPark(Env, Serializable):
         # Sample a starting point
         init_t_idx = np.random.choice(len(self.all_trace[trace_idx]))
 
-        return self.all_trace[trace_idx], init_t_idx
+        return trace_idx, self.all_trace[trace_idx], init_t_idx
 
     def __get_chunk_time(self):
         if self.curr_t_idx == len(self.trace) - 1:  # At the end of the trace
@@ -104,10 +128,10 @@ class PenseieveEnvPark(Env, Serializable):
         progs = [
             path["observations"][-1][-3] - path["observations"][0][-3] for path in paths
         ]
-        logger.logkv(prefix + "AverageForwardProgress", np.mean(progs))
-        logger.logkv(prefix + "MaxForwardProgress", np.max(progs))
-        logger.logkv(prefix + "MinForwardProgress", np.min(progs))
-        logger.logkv(prefix + "StdForwardProgress", np.std(progs))
+        # logger.logkv(prefix + "AverageForwardProgress", np.mean(progs))
+        # logger.logkv(prefix + "MaxForwardProgress", np.max(progs))
+        # logger.logkv(prefix + "MinForwardProgress", np.min(progs))
+        # logger.logkv(prefix + "StdForwardProgress", np.std(progs))
 
     @property
     def observation_space(self):
@@ -215,12 +239,15 @@ class PenseieveEnvPark(Env, Serializable):
             {
                 "bitrate": VIDEO_BIT_RATE[action],
                 "stall_time": rebuffer_time,
+                "buffer_size": self.buffer_size,
+                "delay": delay,
+                "chunk_size": chunk_size,
                 "bitrate_change": bitrate_change,
             },
         )
 
     def reset(self):
-        self.trace, self.curr_t_idx = self.__sample_trace()
+        trace_idx, self.trace, self.curr_t_idx = self.__sample_trace()
         self.chunk_time_left = self.__get_chunk_time()
         self.chunk_idx = 0
         self.buffer_size = 0
@@ -237,8 +264,10 @@ class PenseieveEnvPark(Env, Serializable):
         def calc(_observation, _action, _next_observation):
             _action = self.__convert_action(_action)
             _past_action = int(_observation[4])
-            if _past_action == ACTION_DIM:
+            if _past_action >= ACTION_DIM:
                 _past_action = ACTION_DIM - 1
+            if _past_action < 0:
+                _past_action = 0
 
             if _past_action is None:
                 bitrate_change = 0

@@ -9,6 +9,7 @@ def rollout(
     ignore_done=False,
     num_rollouts=1,
     adapt_batch_size=None,
+    logger_handle=None,
 ):
     """get wrapped env"""
     wrapped_env = env
@@ -40,20 +41,37 @@ def rollout(
                     [np.array(adapt_next_obs)],
                 )
             a, agent_info = policy.get_action(o)
-            next_o, r, d, env_info = env.step(a)
+            next_o, r, d, env_info = env.step(a[0])
             observations.append(o)
             rewards.append(r)
             actions.append(a[0])
             agent_infos.append(agent_info)
             env_infos.append(env_info)
             path_length += 1
+
+            if logger_handle is not None:
+                logger_handle.write(
+                    str(env_info["bitrate"])
+                    + "\t"
+                    + str(env_info["stall_time"])
+                    + "\t"
+                    + str(env_info["buffer_size"])
+                    + "\t"
+                    + str(env_info["chunk_size"])
+                    + "\t"
+                    + str(env_info["delay"])
+                    + "\t"
+                    + str(r)
+                    + "\n"
+                )
+
             if d and not ignore_done:  # and not animated:
                 break
             o = next_o
 
             if animated:
                 env.render()
-
+        logger_handle.write(f"Average reward: {np.mean(rewards)}\n")
         paths.append(
             dict(
                 observations=observations,

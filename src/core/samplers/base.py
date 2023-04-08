@@ -247,19 +247,23 @@ class SampleProcessor(object):
         # compute log stats
         average_discounted_return = np.mean([path["returns"][0] for path in paths])
         undiscounted_returns = [sum(path["rewards"]) for path in paths]
+        average_reward = [np.mean(path["rewards"]) for path in paths]
 
         if log == "reward":
             logger.logkv(log_prefix + "AverageReturn", np.mean(undiscounted_returns))
 
         elif log == "all" or log is True:
+            # logger.logkv(
+            #     log_prefix + "AverageDiscountedReturn", average_discounted_return
+            # )
+            # logger.logkv(log_prefix + "AverageReturn", np.mean(undiscounted_returns))
+            # logger.logkv(log_prefix + "NumTrajs", len(paths))
+            # logger.logkv(log_prefix + "StdReturn", np.std(undiscounted_returns))
+            # logger.logkv(log_prefix + "MaxReturn", np.max(undiscounted_returns))
+            # logger.logkv(log_prefix + "MinReturn", np.min(undiscounted_returns))
             logger.logkv(
-                log_prefix + "AverageDiscountedReturn", average_discounted_return
+                log_prefix + "Sample(Validation)AverageReward", np.mean(average_reward)
             )
-            logger.logkv(log_prefix + "AverageReturn", np.mean(undiscounted_returns))
-            logger.logkv(log_prefix + "NumTrajs", len(paths))
-            logger.logkv(log_prefix + "StdReturn", np.std(undiscounted_returns))
-            logger.logkv(log_prefix + "MaxReturn", np.max(undiscounted_returns))
-            logger.logkv(log_prefix + "MinReturn", np.min(undiscounted_returns))
 
     def _compute_advantages(self, paths, all_path_baselines):
         assert len(paths) == len(all_path_baselines)

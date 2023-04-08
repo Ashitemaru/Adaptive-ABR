@@ -215,6 +215,9 @@ class DataLoader:
 
         trace_a = TraceHelper.down_sample(self.__sample_trace_by_env(env_a))
         trace_b = TraceHelper.down_sample(self.__sample_trace_by_env(env_b))
+        # end_time = int(min(trace_a[-1][0], trace_b[-1][0]))
+        # TraceHelper.plot_trace([t for t in trace_a if t[0] <= end_time], [], "4G-walking", "./image/4g-walking.png")
+        # TraceHelper.plot_trace([t for t in trace_b if t[0] <= end_time], [], "4G-driving", "./image/4g-driving.png")
         if switch_mode == "single":
             return (
                 trace_a + [(time + trace_a[-1][0] + 1, bw) for time, bw in trace_b],
@@ -330,4 +333,6 @@ def generate_pensieve_baseline_set():
 
 
 if __name__ == "__main__":
-    generate_pensieve_baseline_set()
+    loader = DataLoader()
+    trace, split = loader.sample_switch_trace(switch_mode="interval", n_switch=3)
+    TraceHelper.plot_trace(trace, split, "Switch", "./image/switch.png")

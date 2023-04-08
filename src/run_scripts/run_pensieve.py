@@ -21,7 +21,7 @@ EXP_NAME = "grbal_pensieve"
 def run_experiment(config):
     exp_dir = os.getcwd() + "/data/" + EXP_NAME + "/" + config.get("exp_name", "")
     logger.configure(
-        dir=exp_dir, format_strs=["stdout", "log", "csv"], snapshot_mode="last"
+        dir=exp_dir, format_strs=["stdout", "log", "csv"], snapshot_mode="all"
     )
     json.dump(
         config,
@@ -31,7 +31,7 @@ def run_experiment(config):
         cls=ClassEncoder,
     )
 
-    env = normalize(config["env"]())
+    env = normalize(config["env"](mode="train-1"))
 
     dynamics_model = MetaMLPDynamicsModel(
         name="dyn_model",
