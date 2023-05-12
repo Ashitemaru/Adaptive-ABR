@@ -2,4 +2,5 @@
 **/__pycache__/**
 **/MUJOCO_LOG.TXT
 /src/data/base/**
+/src/data/mid_reserved_base/**
 **/log/**

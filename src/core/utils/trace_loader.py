@@ -333,6 +333,4 @@ def generate_pensieve_baseline_set():
 
 
 if __name__ == "__main__":
-    loader = DataLoader()
-    trace, split = loader.sample_switch_trace(switch_mode="interval", n_switch=3)
-    TraceHelper.plot_trace(trace, split, "Switch", "./image/switch.png")
+    generate_pensieve_baseline_set()
