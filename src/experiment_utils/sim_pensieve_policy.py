@@ -77,7 +77,6 @@ def rollout_pensieve(
             break
         observation = next_observation
 
-        logger_handle.write(f"Average reward: {np.mean(rewards)}\n")
         paths.append(
             dict(
                 observations=observations,
@@ -88,6 +87,7 @@ def rollout_pensieve(
             )
         )
 
+    logger_handle.write(f"Average reward: {np.mean(rewards)}\n")
     return paths
 
 
@@ -106,7 +106,6 @@ def sim_policy_for_pensieve(itr, pkl_path, json_path, mode):
                 policy,
                 trace_idx=i,
                 max_path_length=1000,
-                animated=False,
                 ignore_done=False,
                 adapt_batch_size=json_params.get("adapt_batch_size", None),
                 logger_handle=open(f"./log/iter_{itr}_mode_{mode}_trace_{i}.log", "w"),
