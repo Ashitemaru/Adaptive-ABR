@@ -1,5 +1,5 @@
 LUMOS_PATH = "./src/data/lumos/Lumos5G-v1.0.csv"
-LUMOS_TRACE_DIR = "./src/data/lumos"
+LUMOS_TRACE_DIR = "./src/data/lumos_traces"
 
 
 def main():
@@ -43,7 +43,7 @@ def main():
             trace_item = {
                 "time": float(seq_num),
                 "status": "5G" if nr_status == "CONNECTED" else "4G",
-                "throughput": float(throughput),
+                "throughput": float(throughput) / 8,  # TODO: Rewind
                 "mobility_mode": mobility_mode,
             }
             if run_num in trace_dict:

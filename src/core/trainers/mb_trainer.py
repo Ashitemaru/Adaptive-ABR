@@ -2,7 +2,6 @@ import tensorflow as tf
 import time
 import os
 from core.logger import logger
-from experiment_utils.sim_policy import sim_policy_for_pensieve
 
 
 class Trainer(object):
@@ -125,15 +124,12 @@ class Trainer(object):
                 if itr == 1:
                     sess.graph.finalize()
 
-                # TODO: Ungly method, should be rewinded
+                # TODO: Ugly method, should be rewinded
                 """ --------------- Test the dynamics model --------------- """
 
                 logger.log(f"Testing the dynamic model after {itr} iterations")
-                # os.system(f"python ./src/experiment_utils/sim_policy.py -i {itr} -j ./data/grbal_pensieve/params.json -m driving")
-                # os.system(f"python ./src/experiment_utils/sim_policy.py -i {itr} -j ./data/grbal_pensieve/params.json -m walking")
-                # os.system(f"python ./src/experiment_utils/sim_policy.py -i {itr} -j ./data/grbal_pensieve/params.json -m random")
                 os.system(
-                    f"python ./src/experiment_utils/sim_policy.py -i {itr} -j ./data/grbal_pensieve/params.json -m interval"
+                    f"python ./src/experiment_utils/sim_pensieve_policy.py -i {itr} -j ./data/grbal_pensieve/params.json -m lumos"
                 )
 
                 logger.dumpkvs()

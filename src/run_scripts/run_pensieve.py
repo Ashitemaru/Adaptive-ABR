@@ -31,7 +31,7 @@ def run_experiment(config):
         cls=ClassEncoder,
     )
 
-    env = normalize(config["env"](mode="train-1"))
+    env = normalize(config["env"](mode="train-lumos"))
 
     dynamics_model = MetaMLPDynamicsModel(
         name="dyn_model",

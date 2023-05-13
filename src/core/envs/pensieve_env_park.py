@@ -80,27 +80,30 @@ class PenseieveEnvPark(Env, Serializable):
         # assert self.total_num_chunks == TOTAL_VIDEO_CHUNCK
 
     def __load_traces(self):
-        root = "./src/data/base/"
-        if self.mode.startswith("train-") and self.mode.split("-")[1] in [
+        if self.mode == "train-lumos":
+            path = "./src/data/lumos_traces"
+        elif self.mode == "test-lumos":
+            path = "./src/data/lumos_test_traces"
+        elif self.mode.startswith("train-") and self.mode.split("-")[1] in [
             "1",
             "2",
             "3",
         ]:
-            suffix = self.mode.replace("train-", "train_set_")
+            path = "./src/data/base/" + self.mode.replace("train-", "train_set_")
         elif self.mode.startswith("test-") and self.mode.split("-")[1] in [
             "interval",
             "driving",
             "walking",
             "random",
         ]:
-            suffix = self.mode.replace("test-", "test_set_")
+            path = "./src/data/base/" + self.mode.replace("test-", "test_set_")
         else:
             raise ValueError("Invalid mode")
 
         self.all_trace = []
-        trace_file_list = os.listdir(root + suffix)
+        trace_file_list = os.listdir(path)
         for file_name in trace_file_list:
-            file_path = os.path.join(root + suffix, file_name)
+            file_path = os.path.join(path, file_name)
             trace, _ = TraceHelper.load_trace(file_path, enable_none=False)
 
             self.all_trace.append(trace)
@@ -140,6 +143,10 @@ class PenseieveEnvPark(Env, Serializable):
     @property
     def action_space(self):
         return self._action_space
+
+    @property
+    def trace_num(self):
+        return len(self.all_trace)
 
     def observe(self):
         if self.chunk_idx < self.total_num_chunks:
@@ -246,8 +253,16 @@ class PenseieveEnvPark(Env, Serializable):
             },
         )
 
-    def reset(self):
-        trace_idx, self.trace, self.curr_t_idx = self.__sample_trace()
+    def reset(self, hard_trace_idx=None):
+        """
+        Set 'hard_trace_idx' to a valid trace ID when want to hard set the trace.
+        """
+
+        if hard_trace_idx is None:
+            trace_idx, self.trace, self.curr_t_idx = self.__sample_trace()
+        else:
+            self.trace, self.curr_t_idx = self.all_trace[hard_trace_idx], 0
+
         self.chunk_time_left = self.__get_chunk_time()
         self.chunk_idx = 0
         self.buffer_size = 0
