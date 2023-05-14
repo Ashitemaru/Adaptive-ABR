@@ -1,15 +1,17 @@
 import os
 import sys
+import joblib
+import tensorflow as tf
+import argparse
+from tqdm import tqdm
+import json
+import numpy as np
+from datetime import datetime
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_path, ".."))
 
-import joblib
-import tensorflow as tf
-import argparse
-from core.envs.pensieve_env_park import ABREnv
-import json
-import numpy as np
+from core.envs.abr_env import ABREnv
 
 
 def rollout(
@@ -92,6 +94,10 @@ def rollout(
 
 
 def sim_abr_policy(itr, pkl_path, json_path, mode):
+    log_path = os.getcwd() + "/log/" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
+
     with tf.Session() as sess:
         print("Testing policy %s with mode %s" % (pkl_path, mode))
         json_params = json.load(open(json_path, "r"))
@@ -100,7 +106,7 @@ def sim_abr_policy(itr, pkl_path, json_path, mode):
         env = ABREnv(mode="test-" + mode)
 
         rewards = []
-        for i in range(env.trace_num):
+        for i in tqdm(range(env.trace_num)):
             path = rollout(
                 env,
                 policy,
@@ -108,7 +114,9 @@ def sim_abr_policy(itr, pkl_path, json_path, mode):
                 max_path_length=1000,
                 ignore_done=False,
                 adapt_batch_size=json_params.get("adapt_batch_size", None),
-                logger_handle=open(f"./log/iter_{itr}_mode_{mode}_trace_{i}.log", "w"),
+                logger_handle=open(
+                    f"{log_path}/iter_{itr}_mode_{mode}_trace_{i}.log", "w"
+                ),
             )
             rewards.append(np.mean([np.mean(p["rewards"]) for p in path]))
 
