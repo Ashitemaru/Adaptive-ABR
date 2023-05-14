@@ -129,7 +129,7 @@ class Trainer(object):
 
                 logger.log(f"Testing the dynamic model after {itr} iterations")
                 os.system(
-                    f"python ./src/experiment_utils/sim_pensieve_policy.py -i {itr} -j ./data/grbal_pensieve/params.json -m lumos"
+                    f"python ./src/experiment_utils/sim_abr_policy.py -i {itr} -j ./data/grbal_abr/params.json -m lumos"
                 )
 
                 logger.dumpkvs()

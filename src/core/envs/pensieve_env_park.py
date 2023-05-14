@@ -1,11 +1,14 @@
 import numpy as np
 from collections import deque
 import os
+import sys
+
+current_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_path, "../.."))
 
 from core.utils.serializable import Serializable
 from core.envs.base import Env
 from core.spaces.box import Box
-from core.logger import logger
 from core.utils.trace_loader import TraceHelper
 from core.utils.constants import (
     ACTION_DIM,
@@ -20,7 +23,7 @@ from core.utils.constants import (
 )
 
 
-class PenseieveEnvPark(Env, Serializable):
+class ABREnv(Env, Serializable):
     def __init__(self, mode="train-1", random_seed=42):
         Serializable.quick_init(self, locals())
 
@@ -128,13 +131,7 @@ class PenseieveEnvPark(Env, Serializable):
             return self.trace[self.curr_t_idx + 1][0] - self.trace[self.curr_t_idx][0]
 
     def log_diagnostics(self, paths, prefix):
-        progs = [
-            path["observations"][-1][-3] - path["observations"][0][-3] for path in paths
-        ]
-        # logger.logkv(prefix + "AverageForwardProgress", np.mean(progs))
-        # logger.logkv(prefix + "MaxForwardProgress", np.max(progs))
-        # logger.logkv(prefix + "MinForwardProgress", np.min(progs))
-        # logger.logkv(prefix + "StdForwardProgress", np.std(progs))
+        pass
 
     @property
     def observation_space(self):
@@ -159,7 +156,7 @@ class PenseieveEnvPark(Env, Serializable):
         else:
             valid_past_action = 0
 
-        obs_arr = [
+        observation = [
             self.past_chunk_throughputs[-1],
             self.past_chunk_download_times[-1],
             self.buffer_size,
@@ -167,19 +164,19 @@ class PenseieveEnvPark(Env, Serializable):
             valid_past_action,
         ]
 
-        obs_arr.extend(self.chunk_size[i][valid_chunk_idx] for i in range(6))
+        observation.extend(self.chunk_size[i][valid_chunk_idx] for i in range(6))
 
-        for i in range(len(obs_arr)):
-            if obs_arr[i] > self.observation_high[i]:
+        for i in range(len(observation)):
+            if observation[i] > self.observation_high[i]:
                 print(
-                    f"[WARN] Observation at index {i} at chunk index {self.chunk_idx} has value {obs_arr[i]}, higher than obs_high {self.observation_high[i]}"
+                    f"[WARN] Observation at index {i} at chunk index {self.chunk_idx} has value {observation[i]}, higher than obs_high {self.observation_high[i]}"
                 )
-                obs_arr[i] = self.observation_high[i]
+                observation[i] = self.observation_high[i]
 
-        obs_arr = np.array(obs_arr)
-        assert self.observation_space.contains(obs_arr)
+        observation = np.array(observation)
+        assert self.observation_space.contains(observation)
 
-        return obs_arr
+        return observation
 
     def step(self, action):
         assert self.action_space.contains(action)
@@ -201,7 +198,7 @@ class PenseieveEnvPark(Env, Serializable):
             self.chunk_time_left -= chunk_time_used
             delay += chunk_time_used
 
-            if self.chunk_time_left == 0:
+            if abs(self.chunk_time_left) < 1e-8:
                 self.curr_t_idx += 1
                 if self.curr_t_idx == len(self.trace):
                     self.curr_t_idx = 0
@@ -304,4 +301,41 @@ class PenseieveEnvPark(Env, Serializable):
 
 
 if __name__ == "__main__":
-    pass
+    env = ABREnv(mode="test-lumos")
+    trace_idx = 0
+
+    observations = []
+    actions = []
+    rewards = []
+    env_infos = []
+
+    bitrate_to_action = {
+        20000: 0,
+        40000: 1,
+        60000: 2,
+        80000: 3,
+        110000: 4,
+        160000: 5,
+    }
+    with open(f"./log/iter_0_mode_lumos_trace_{trace_idx}.log", "r") as handler:
+        action_list = [
+            bitrate_to_action[int(x.split()[0])] for x in handler.readlines()[:-1]
+        ]
+
+    observation = env.reset(trace_idx)
+
+    while True:
+        action = np.array([action_list[env.chunk_idx]])
+
+        next_observation, reward, done, env_info = env.step(action)
+        observations.append(observation)
+        rewards.append(reward)
+        actions.append(action[0])
+        env_infos.append(env_info)
+
+        if done:
+            break
+        observation = next_observation
+
+    print([x["stall_time"] for x in env_infos])
+    print(rewards)

@@ -242,7 +242,7 @@ class DataLoader:
             raise ValueError("Invalid switching mode")
 
 
-def generate_pensieve_baseline_set():
+def generate_base_dataset():
     loader = DataLoader()
 
     """
@@ -333,4 +333,4 @@ def generate_pensieve_baseline_set():
 
 
 if __name__ == "__main__":
-    generate_pensieve_baseline_set()
+    generate_base_dataset()

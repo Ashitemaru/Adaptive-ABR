@@ -7,7 +7,7 @@ import numpy as np
 
 if __name__ == "__main__":
     rewards = []
-    with open("./data/grbal_pensieve/reward.log", "r") as f:
+    with open("./data/grbal_abr/reward.log", "r") as f:
         for line in f:
             rewards.append(float(line.replace("\n", "")))
 

@@ -13,9 +13,9 @@ from core.samplers.model_sample_processor import ModelSampleProcessor
 from core.logger import logger
 from core.dynamics.meta_mlp_dynamics import MetaMLPDynamicsModel
 from core.trainers.mb_trainer import Trainer
-from core.envs.pensieve_env_park import PenseieveEnvPark
+from core.envs.pensieve_env_park import ABREnv
 
-EXP_NAME = "grbal_pensieve"
+EXP_NAME = "grbal_abr"
 
 
 def run_experiment(config):
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     config = {
         # Environment
-        "env": PenseieveEnvPark,
+        "env": ABREnv,
         "max_path_length": 1000,
         "task": None,
         "normalize": True,

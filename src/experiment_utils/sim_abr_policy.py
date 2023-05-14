@@ -7,12 +7,12 @@ sys.path.append(os.path.join(current_path, ".."))
 import joblib
 import tensorflow as tf
 import argparse
-from core.envs.pensieve_env_park import PenseieveEnvPark
+from core.envs.pensieve_env_park import ABREnv
 import json
 import numpy as np
 
 
-def rollout_pensieve(
+def rollout(
     env,
     policy,
     trace_idx,
@@ -80,7 +80,7 @@ def rollout_pensieve(
         paths.append(
             dict(
                 observations=observations,
-                actons=actions,
+                actions=actions,
                 rewards=rewards,
                 agent_infos=agent_infos,
                 env_infos=env_infos,
@@ -91,17 +91,17 @@ def rollout_pensieve(
     return paths
 
 
-def sim_policy_for_pensieve(itr, pkl_path, json_path, mode):
+def sim_abr_policy(itr, pkl_path, json_path, mode):
     with tf.Session() as sess:
         print("Testing policy %s with mode %s" % (pkl_path, mode))
         json_params = json.load(open(json_path, "r"))
         data = joblib.load(pkl_path)
         policy = data["policy"]
-        env = PenseieveEnvPark(mode="test-" + mode)
+        env = ABREnv(mode="test-" + mode)
 
         rewards = []
         for i in range(env.trace_num):
-            path = rollout_pensieve(
+            path = rollout(
                 env,
                 policy,
                 trace_idx=i,
@@ -115,7 +115,7 @@ def sim_policy_for_pensieve(itr, pkl_path, json_path, mode):
         avg_reward = np.mean(rewards)
         print(f"TestAverageReward({mode}) = {avg_reward}")
 
-        with open("./data/grbal_pensieve/reward.log", "a") as f:
+        with open("./data/grbal_abr/reward.log", "a") as f:
             f.write(f"{avg_reward}\n")
 
 
@@ -126,9 +126,9 @@ if __name__ == "__main__":
     parser.add_argument("--mode", "-m", type=str, help="Test mode")
     args = parser.parse_args()
 
-    sim_policy_for_pensieve(
+    sim_abr_policy(
         args.iteration,
-        f"./data/grbal_pensieve/itr_{args.iteration}.pkl",
+        f"./data/grbal_abr/itr_{args.iteration}.pkl",
         args.json,
         args.mode,
     )
