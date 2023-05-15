@@ -24,11 +24,12 @@ from core.utils.constants import (
 
 
 class ABREnv(Env, Serializable):
-    def __init__(self, mode="train-1", random_seed=42):
+    def __init__(self, mode="train-1", random_seed=42, full_observation=False):
         Serializable.quick_init(self, locals())
 
         self.random_seed = random_seed
         self.mode = mode
+        self.full_observation = full_observation
         np.random.seed(random_seed)
 
         self.__setup_space()
@@ -36,21 +37,18 @@ class ABREnv(Env, Serializable):
         self.__load_traces()
 
     def __setup_space(self):
-        self.observation_low = np.array([0] * 11)
+        self.observation_low = np.array([0] * (25 if self.full_observation else 11))
         self.observation_high = np.array(
-            [
-                10e8,  # Past chunk throughput, in bytes per second
-                100,  # Past chunk download time, in second
-                100,  # Buffer size, in second
-                500,  # Video chunk left
-                5,  # Past action
-                10e7,  # Chunk sizes for 6 bitrate, in bytes
-                10e7,
-                10e7,
-                10e7,
-                10e7,
-                10e7,
-            ]
+            [10e8]
+            * (
+                8 if self.full_observation else 1
+            )  # Past chunk throughputs, in bytes per second
+            + [200]
+            * (
+                8 if self.full_observation else 1
+            )  # Past chunk download times, in second
+            + [100, 500, 5]  # Buffer size, in second & Video chunk left & Past action
+            + [10e7] * 6  # Chunk sizes for 6 bitrate, in bytes
         )
         self._observation_space = Box(
             low=self.observation_low, high=self.observation_high
@@ -156,13 +154,31 @@ class ABREnv(Env, Serializable):
         else:
             valid_past_action = 0
 
-        observation = [
-            self.past_chunk_throughputs[-1],
-            self.past_chunk_download_times[-1],
-            self.buffer_size,
-            self.total_num_chunks - self.chunk_idx,
-            valid_past_action,
-        ]
+        past_throughputs = []
+        for i in range(8 if self.full_observation else 1):
+            try:
+                throughput = self.past_chunk_throughputs[-i - 1]
+            except:
+                throughput = 0
+            past_throughputs.append(throughput)
+
+        past_chunk_download_times = []
+        for i in range(8 if self.full_observation else 1):
+            try:
+                delay = self.past_chunk_download_times[-i - 1]
+            except:
+                delay = 0
+            past_chunk_download_times.append(delay)
+
+        observation = (
+            past_throughputs
+            + past_chunk_download_times
+            + [
+                self.buffer_size,
+                self.total_num_chunks - self.chunk_idx,
+                valid_past_action,
+            ]
+        )
 
         observation.extend(self.chunk_size[i][valid_chunk_idx] for i in range(6))
 

@@ -1,5 +1,8 @@
+import os
+
 LUMOS_PATH = "./src/data/lumos/Lumos5G-v1.0.csv"
-LUMOS_TRACE_DIR = "./src/data/lumos_traces"
+LUMOS_TRAIN_TRACE_DIR = "./src/data/lumos_traces"
+LUMOS_TEST_TRACE_DIR = "./src/data/lumos_test_traces"
 
 
 def main():
@@ -43,7 +46,7 @@ def main():
             trace_item = {
                 "time": float(seq_num),
                 "status": "5G" if nr_status == "CONNECTED" else "4G",
-                "throughput": float(throughput) / 8,  # TODO: Rewind
+                "throughput": float(throughput) / 2,
                 "mobility_mode": mobility_mode,
             }
             if run_num in trace_dict:
@@ -52,6 +55,10 @@ def main():
                 trace_dict[run_num] = [trace_item]
 
     # Dump the trace
+    if not os.path.exists(LUMOS_TRAIN_TRACE_DIR):
+        os.makedirs(LUMOS_TRAIN_TRACE_DIR)
+    if not os.path.exists(LUMOS_TEST_TRACE_DIR):
+        os.makedirs(LUMOS_TEST_TRACE_DIR)
     for run_num, trace in trace_dict.items():
         assert (
             len(set([x["mobility_mode"] for x in trace])) == 1
@@ -60,7 +67,10 @@ def main():
             len(set([x["status"] for x in trace])) > 1
         )  # All traces have at least one handoff
 
-        with open(f"{LUMOS_TRACE_DIR}/lumos_trace_{run_num}.log", "w") as handler:
+        with open(
+            f"{LUMOS_TEST_TRACE_DIR if run_num < 25 else LUMOS_TRAIN_TRACE_DIR}/lumos_trace_{run_num}.log",
+            "w",
+        ) as handler:
             for trace_item in trace:
                 handler.write(
                     str(trace_item["time"]) + " " + str(trace_item["throughput"]) + "\n"

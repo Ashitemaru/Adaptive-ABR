@@ -10,6 +10,7 @@ from datetime import datetime
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_path, ".."))
+tf.logging.set_verbosity(tf.logging.ERROR)
 
 from core.envs.abr_env import ABREnv
 
@@ -94,11 +95,13 @@ def rollout(
 
 
 def sim_abr_policy(itr, pkl_path, json_path, mode):
-    log_path = os.getcwd() + "/log/" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+    log_path = (
+        os.getcwd() + "/log/grbal-" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+    )
     if not os.path.exists(log_path):
         os.makedirs(log_path)
 
-    with tf.Session() as sess:
+    with tf.Session() as session:
         print("Testing policy %s with mode %s" % (pkl_path, mode))
         json_params = json.load(open(json_path, "r"))
         data = joblib.load(pkl_path)
@@ -118,7 +121,7 @@ def sim_abr_policy(itr, pkl_path, json_path, mode):
                     f"{log_path}/iter_{itr}_mode_{mode}_trace_{i}.log", "w"
                 ),
             )
-            rewards.append(np.mean([np.mean(p["rewards"]) for p in path]))
+            rewards.append(np.mean(path[-1]["rewards"]))
 
         avg_reward = np.mean(rewards)
         print(f"TestAverageReward({mode}) = {avg_reward}")

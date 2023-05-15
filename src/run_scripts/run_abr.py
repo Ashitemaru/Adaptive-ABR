@@ -1,9 +1,11 @@
 import os
 import sys
 import json
+import tensorflow as tf
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_path, ".."))
+tf.logging.set_verbosity(tf.logging.ERROR)
 
 from core.utils.utils import ClassEncoder
 from core.envs.normalized_env import normalize

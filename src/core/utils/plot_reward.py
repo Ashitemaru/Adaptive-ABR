@@ -4,17 +4,23 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 if __name__ == "__main__":
-    rewards = []
-    with open("./data/grbal_abr/reward.log", "r") as f:
-        for line in f:
-            rewards.append(float(line.replace("\n", "")))
+    reward_lists = []
+    for exp in sys.argv[1:]:
+        rewards = []
+        with open(f"./data/{exp}/reward.log", "r") as f:
+            for line in f:
+                rewards.append(float(line.replace("\n", "")))
 
-    print(f"Average reward: {np.mean(rewards)}")
+        reward_lists.append(rewards)
 
     plt.figure()
-    plt.plot(rewards)
+    plt.title("Average reward (QoE)")
+    for rewards in reward_lists:
+        plt.plot(rewards)
+    plt.legend(sys.argv[1:])
     plt.xlabel("Iteration")
     plt.ylabel("Average reward")
     plt.savefig("./image/reward.png")

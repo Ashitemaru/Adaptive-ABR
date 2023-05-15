@@ -27,3 +27,20 @@ BITS_IN_BYTE = 8
 
 TRACE_FILE = "./src/data/cooked_traces/"
 VIDEO_SIZE_FILE = "./src/data/video_size_5g/video_size_"
+
+# PPO Pensieve baseline related params
+HIDDEN_LAYER_SIZE = 128
+CONV_FILTER_NUM = 128
+CONV_FILTER_SIZE = 4
+ACTION_EPSILON = 1e-4
+PPO_EPSILON = 0.2
+REWARD_DECAY = 0.99
+AGENT_NUM = 16
+ACTOR_LR = 1e-4
+
+PPO_TRAIN_EPOCH = 5
+TRAIN_EPOCH = 1000000
+TRAIN_SEQUENCE_LEN = 1000
+MODEL_SAVE_INTERVAL = 300
+
+PPO_SUMMARY_DIR = "./log/pensieve_summary/"
