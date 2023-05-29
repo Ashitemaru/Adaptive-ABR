@@ -2,10 +2,17 @@ import os
 import numpy as np
 import random
 import matplotlib
+import sys
+import json
 
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+
+current_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_path, "../.."))
+
+from core.utils.plot_cdf import plot_cdf
 
 TRAIN_DATA_DIR = "./src/data/env_train_traces"
 TEST_DATA_DIR = "./src/data/env_test_traces"
@@ -333,4 +340,42 @@ def generate_base_dataset():
 
 
 if __name__ == "__main__":
-    generate_base_dataset()
+    # generate_base_dataset()
+    loader = DataLoader()
+    walking_traces = loader.get_trace_set_by_env("4g-walking")
+    driving_traces = loader.get_trace_set_by_env("4g-driving")
+
+    print(walking_traces[0])
+    print(driving_traces[0])
+    exit(0)
+
+    def concat(traces):
+        return np.concatenate(
+            [np.array([x[1] for x in trace]) for trace in traces], axis=0
+        )
+
+    def delta_concat(traces):
+        return np.concatenate(
+            [
+                np.array(
+                    [abs(trace[i + 1][1] - trace[i][1]) for i in range(len(trace) - 1)]
+                )
+                for trace in traces
+            ],
+            axis=0,
+        )
+
+    print(np.mean(delta_concat(walking_traces)), np.mean(delta_concat(driving_traces)))
+    print(np.std(delta_concat(walking_traces)), np.std(delta_concat(driving_traces)))
+
+    plot_cdf(
+        bases=[
+            delta_concat(walking_traces),
+            delta_concat(driving_traces),
+        ],
+        labels=["Walking", "Driving"],
+        xlabel="Bandwidth Difference (Mbps)",
+        path="./image/diff_cdf.png",
+        xmin=0,
+        xmax=35,
+    )

@@ -46,7 +46,7 @@ def main():
             trace_item = {
                 "time": float(seq_num),
                 "status": "5G" if nr_status == "CONNECTED" else "4G",
-                "throughput": float(throughput) / 2,
+                "throughput": float(throughput) / 8,
                 "mobility_mode": mobility_mode,
             }
             if run_num in trace_dict:
