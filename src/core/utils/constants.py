@@ -5,7 +5,7 @@ PACKET_PAYLOAD_PORTION = 0.95
 LINK_RTT = 104  # In ms
 NOISE_LOW = 0.95
 NOISE_HIGH = 1.05
-VIDEO_CHUNCK_LEN = 4000  # In ms
+VIDEO_CHUNCK_LEN = 20000  # In ms
 # VIDEO_CHUNCK_LEN = 1000  # In ms
 BUFFER_THRESH = 60000  # In ms
 DRAIN_BUFFER_SLEEP_TIME = 500  # In ms
@@ -28,6 +28,7 @@ BITS_IN_BYTE = 8
 
 TRACE_FILE = "./src/data/cooked_traces/"
 VIDEO_SIZE_FILE = "./src/data/video_size_5g/video_size_"
+VIDEO_SIZE_FILE_4G = "./src/data/video_size/video_size_"
 
 # PPO Pensieve baseline related params
 HIDDEN_LAYER_SIZE = 128

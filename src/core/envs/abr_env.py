@@ -14,6 +14,7 @@ from core.utils.constants import (
     ACTION_DIM,
     BITRATE_LEVELS,
     VIDEO_SIZE_FILE,
+    VIDEO_SIZE_FILE_4G,
     STATE_LEN,
     VIDEO_BIT_RATE,
     REBUF_PENALTY,
@@ -24,11 +25,14 @@ from core.utils.constants import (
 
 
 class ABREnv(Env, Serializable):
-    def __init__(self, mode="train-1", random_seed=42, full_observation=False):
+    def __init__(
+        self, mode="train-1", video="5g", random_seed=42, full_observation=False
+    ):
         Serializable.quick_init(self, locals())
 
         self.random_seed = random_seed
         self.mode = mode
+        self.video = video
         self.full_observation = full_observation
         np.random.seed(random_seed)
 
@@ -68,7 +72,10 @@ class ABREnv(Env, Serializable):
         self.chunk_size = []
         for bitrate in range(BITRATE_LEVELS):
             chunk_size_bitrate = []
-            with open(VIDEO_SIZE_FILE + str(bitrate)) as f:
+            with open(
+                (VIDEO_SIZE_FILE if self.video == "5g" else VIDEO_SIZE_FILE_4G)
+                + str(bitrate)
+            ) as f:
                 for line in f:
                     chunk_size_bitrate.append(int(line.split()[0]))
             self.chunk_size.append(chunk_size_bitrate)
@@ -85,6 +92,14 @@ class ABREnv(Env, Serializable):
             path = "./src/data/lumos_traces"
         elif self.mode == "test-lumos":
             path = "./src/data/lumos_test_traces"
+        elif self.mode == "test-ucc-driving":
+            path = "./src/data/ucc_5g_driving_traces"
+        elif self.mode == "test-ucc-static":
+            path = "./src/data/ucc_5g_static_traces"
+        elif self.mode == "test-norway":
+            path = "./src/data/cooked_test_traces"
+        elif self.mode == "test-nyu-mets":
+            path = "./src/data/nyu_mets_traces"
         elif self.mode.startswith("train-") and self.mode.split("-")[1] in [
             "1",
             "2",
